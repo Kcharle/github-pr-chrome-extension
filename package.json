@@ -1,0 +1,19 @@
+{
+  "name": "github-pr-monitor",
+  "version": "1.0.0",
+  "description": "Chrome extension to monitor GitHub pull requests",
+  "scripts": {
+    "build:css": "postcss ./src/styles/input.css -o ./options/options.css && postcss ./src/styles/popup-input.css -o ./popup/popup.css",
+    "watch:css": "postcss ./src/styles/input.css -o ./options/options.css --watch",
+    "build": "npm run build:css",
+    "build:ext": "npm run build:css && rm -rf dist && mkdir -p dist && cp -r manifest.json background.js popup options icons dist/ && echo 'Extension built to dist/ folder'"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "cssnano": "^7.1.2",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "postcss-import": "^16.1.1",
+    "tailwindcss": "^3.4.0"
+  }
+}

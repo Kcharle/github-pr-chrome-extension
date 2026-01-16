@@ -1,0 +1,129 @@
+@import "./base.css";
+
+/* Options page specific styles */
+
+/* Logo icon */
+.logo-icon {
+  background-color: var(--accent);
+  color: white;
+}
+
+/* Text helpers */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+/* Background helpers */
+.bg-success {
+  background-color: var(--success);
+}
+
+.bg-warning {
+  background-color: var(--warning);
+}
+
+.bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+/* Border helpers */
+.border-color {
+  border-color: var(--border-primary);
+}
+
+/* Hover background */
+.hover-bg:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Delete button */
+.btn-delete {
+  @apply text-error;
+}
+
+.btn-delete:hover {
+  background-color: var(--error-subtle);
+  border-color: var(--error);
+}
+
+/* Code inline */
+.code {
+  @apply px-1.5 py-0.5 rounded text-xs font-mono;
+  background-color: var(--bg-tertiary);
+}
+
+/* Instructions accordion */
+.instructions-toggle {
+  display: none;
+}
+
+.instructions-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.instructions-toggle:checked ~ .instructions-content {
+  max-height: 1000px;
+}
+
+.instructions-toggle:checked ~ .instructions-header .chevron {
+  transform: rotate(180deg);
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+}
+
+/* Button variants */
+.btn-primary {
+  @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer;
+  background-color: var(--error-subtle);
+  color: var(--error);
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: var(--error);
+  color: white;
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer;
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: none;
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}

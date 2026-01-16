@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub PR Monitor - Settings</title>
+  <link rel="stylesheet" href="../options/options.css">
+  <style>
+    /* Force light mode */
+    :root {
+      color-scheme: light;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #eaeef2;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #6e7781;
+      --border-primary: #d0d7de;
+      --border-secondary: #e6e8eb;
+      --accent: #0969da;
+      --accent-hover: #0860ca;
+      --accent-subtle: rgba(9, 105, 218, 0.1);
+      --success: #1a7f37;
+      --success-subtle: rgba(26, 127, 55, 0.1);
+      --warning: #9a6700;
+      --warning-subtle: rgba(154, 103, 0, 0.1);
+      --error: #cf222e;
+      --error-subtle: rgba(207, 34, 46, 0.1);
+    }
+    /* Force instructions to be open for screenshot */
+    .instructions-toggle:checked ~ .instructions-content {
+      max-height: 1000px;
+      opacity: 1;
+      padding: 0 1rem 1rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="max-w-xl mx-auto px-6 py-12">
+    <!-- Header -->
+    <header class="text-center mb-10">
+      <div class="logo-icon mb-4 inline-flex items-center justify-center w-14 h-14 rounded-2xl">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3v12a3 3 0 0 0 3 3h6"/>
+          <circle cx="6" cy="3" r="2"/>
+          <circle cx="18" cy="18" r="2"/>
+          <path d="M15 15l3 3-3 3"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold">GitHub PR Monitor</h1>
+      <p class="text-secondary mt-2 text-sm">Configure your settings to start monitoring pull requests</p>
+    </header>
+
+    <main class="space-y-5">
+      <!-- Instructions Accordion (checked = open) -->
+      <div class="card overflow-hidden !p-0">
+        <input type="checkbox" id="instructions-toggle" class="instructions-toggle" checked>
+        <label for="instructions-toggle" class="instructions-header flex items-center justify-between gap-3 p-4 cursor-pointer hover-bg transition-colors">
+          <div class="flex items-center gap-3 text-accent font-medium">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            How to set up your GitHub token
+          </div>
+          <svg class="w-5 h-5 text-secondary chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </label>
+        <div class="instructions-content">
+          <div class="px-4 pb-4 pt-2 text-sm border-t border-color">
+            <div class="space-y-5">
+              <div>
+                <h3 class="font-semibold mb-3 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-success"></span>
+                  Option 1: Fine-grained token (Recommended)
+                </h3>
+                <ol class="list-decimal list-inside space-y-2 text-secondary ml-1">
+                  <li>Go to <a href="https://github.com/settings/tokens?type=beta" target="_blank" class="text-accent hover:underline">GitHub Settings → Fine-grained tokens</a></li>
+                  <li>Click <strong class="text-primary">Generate new token</strong></li>
+                  <li>Name it (e.g., "PR Monitor") and set expiration</li>
+                  <li>Under <strong class="text-primary">Repository access</strong>, select repos to monitor</li>
+                  <li>Under <strong class="text-primary">Permissions → Repository</strong>:
+                    <ul class="mt-2 ml-5 space-y-1">
+                      <li>• <code class="code">Pull requests</code> → Read-only</li>
+                      <li>• <code class="code">Commit statuses</code> → Read-only (for CI status)</li>
+                      <li>• <code class="code">Actions</code> → Read-only (for GitHub Actions status)</li>
+                      <li>• <code class="code">Metadata</code> → Read-only</li>
+                    </ul>
+                  </li>
+                  <li>Generate and copy the token</li>
+                </ol>
+              </div>
+
+              <div class="flex items-center gap-4 text-muted">
+                <div class="flex-1 h-px bg-current"></div>
+                <span class="text-xs uppercase tracking-wide">or</span>
+                <div class="flex-1 h-px bg-current"></div>
+              </div>
+
+              <div>
+                <h3 class="font-semibold mb-3 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-warning"></span>
+                  Option 2: Classic token
+                </h3>
+                <ol class="list-decimal list-inside space-y-2 text-secondary ml-1">
+                  <li>Go to <a href="https://github.com/settings/tokens" target="_blank" class="text-accent hover:underline">GitHub Settings → Tokens (classic)</a></li>
+                  <li>Generate new token with <code class="code">repo</code> scope</li>
+                  <li>Copy the token</li>
+                </ol>
+              </div>
+
+              <div class="status-success p-3 flex gap-3 items-start rounded-lg">
+                <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span class="text-sm"><strong>Tip:</strong> Fine-grained tokens are more secure as they limit access to specific repositories.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authentication Card -->
+      <div class="card">
+        <h2 class="text-base font-semibold flex items-center gap-2 mb-4">
+          <span class="accent-bar"></span>
+          Authentication
+        </h2>
+
+        <div class="mb-4">
+          <label class="block text-xs uppercase tracking-wide text-secondary mb-2">
+            GitHub Personal Access Token
+          </label>
+          <input type="password" id="token" value="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" class="input font-mono">
+          <p class="text-xs text-secondary mt-2">See instructions above if you need to generate a token</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" id="validate-token" class="btn">
+            Validate Token
+          </button>
+          <button type="button" id="disconnect-btn" class="btn-danger">
+            Disconnect
+          </button>
+        </div>
+        <div id="token-status" class="status status-success mt-3">
+          ✓ Authenticated as @alexsmith
+        </div>
+      </div>
+
+      <!-- Authenticated sections -->
+      <div id="authenticated-sections" class="space-y-5">
+
+      <!-- Repositories Card -->
+      <div class="card" id="repo-section">
+        <h2 class="text-base font-semibold flex items-center gap-2 mb-1">
+          <span class="accent-bar"></span>
+          Monitored Repositories
+        </h2>
+        <p class="text-xs text-secondary mb-4">Add the repositories you want to monitor for pull requests.</p>
+
+        <div id="selected-repos" class="mb-3">
+          <!-- Repo 1 with alerts expanded -->
+          <div class="bg-tertiary rounded-lg p-3 mb-2 last:mb-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <svg class="text-secondary shrink-0" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8z"/>
+                </svg>
+                <span class="font-mono text-sm truncate">
+                  <span class="text-secondary">acme-corp/</span><span class="font-medium">web-platform</span>
+                </span>
+                <span class="badge badge-warning ml-1 text-[10px]">PRIVATE</span>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button type="button" class="btn text-xs py-1.5 px-3 flex items-center gap-1.5 repo-settings-btn" title="Configure notification alerts for this repo">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                  <span>Alerts</span>
+                </button>
+                <button type="button" class="btn btn-delete text-xs py-1.5 px-2" title="Remove this repository">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <!-- Repo notifications (expanded) -->
+            <div class="repo-notifications mt-3 pt-3 border-t border-color">
+              <div class="text-[10px] uppercase tracking-wider mb-2 text-muted font-medium">Notifications for this repo</div>
+              <div class="flex flex-wrap gap-1.5">
+                <label class="notification-pill" title="Notify when a new PR is opened">
+                  <input type="checkbox" checked>
+                  <span>PRs</span>
+                </label>
+                <label class="notification-pill" title="Notify when new comments are added">
+                  <input type="checkbox" checked>
+                  <span>Comments</span>
+                </label>
+                <label class="notification-pill" title="Notify when a review is submitted">
+                  <input type="checkbox" checked>
+                  <span>Reviews</span>
+                </label>
+                <label class="notification-pill" title="Notify when CI/Actions checks fail">
+                  <input type="checkbox" checked>
+                  <span>CI Fail</span>
+                </label>
+                <label class="notification-pill" title="Notify when all CI/Actions checks pass">
+                  <input type="checkbox" checked>
+                  <span>CI Pass</span>
+                </label>
+                <label class="notification-pill" title="Notify when PR is approved and CI passes">
+                  <input type="checkbox" checked>
+                  <span>Mergeable</span>
+                </label>
+                <label class="notification-pill" title="Notify when PR status changes">
+                  <input type="checkbox" checked>
+                  <span>Status</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Repo Form (expanded) -->
+        <div id="add-repo-form" class="bg-tertiary rounded-lg p-4 mb-3">
+          <div class="mb-3">
+            <label class="block text-xs text-secondary mb-1.5">Organization / User</label>
+            <select id="owner-select" class="select">
+              <option value="">-- Select owner --</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-xs text-secondary mb-1.5">Repository</label>
+            <select id="repo-select" class="select" disabled>
+              <option value="">-- Select owner first --</option>
+            </select>
+          </div>
+
+          <div class="mb-4 pt-3 border-t border-color/50">
+            <p class="text-xs text-secondary mb-2 font-medium">Notifications for this repo</p>
+            <div class="flex flex-wrap gap-1.5" id="add-repo-notifications">
+              <label class="notification-pill" title="Notify when a new PR is opened">
+                <input type="checkbox" id="add-notify-prs" checked>
+                <span>PRs</span>
+              </label>
+              <label class="notification-pill" title="Notify when new comments are added">
+                <input type="checkbox" id="add-notify-comments" checked>
+                <span>Comments</span>
+              </label>
+              <label class="notification-pill" title="Notify when a review is submitted">
+                <input type="checkbox" id="add-notify-reviews" checked>
+                <span>Reviews</span>
+              </label>
+              <label class="notification-pill" title="Notify when CI/Actions checks fail">
+                <input type="checkbox" id="add-notify-ci-failure" checked>
+                <span>CI Fail</span>
+              </label>
+              <label class="notification-pill" title="Notify when all CI/Actions checks pass">
+                <input type="checkbox" id="add-notify-ci-success" checked>
+                <span>CI Pass</span>
+              </label>
+              <label class="notification-pill" title="Notify when PR is approved and CI passes">
+                <input type="checkbox" id="add-notify-ready" checked>
+                <span>Mergeable</span>
+              </label>
+              <label class="notification-pill" title="Notify when PR status changes">
+                <input type="checkbox" id="add-notify-status" checked>
+                <span>Status</span>
+              </label>
+            </div>
+            <p class="text-xs text-muted mt-1.5">Hover for details • Alerts can be adjusted later.</p>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="button" id="confirm-add-repo" class="btn-primary">
+              Add Repository
+            </button>
+            <button type="button" id="cancel-add-repo" class="btn-ghost">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Card -->
+      <div class="card">
+        <h2 class="text-base font-semibold flex items-center gap-2 mb-4">
+          <span class="accent-bar"></span>
+          Notifications
+        </h2>
+
+        <label class="flex items-center gap-3 cursor-pointer mb-4">
+          <input type="checkbox" id="notifications-enabled" class="checkbox" checked>
+          <span class="text-sm font-medium">Enable desktop notifications</span>
+        </label>
+
+        <div>
+          <label class="block text-xs text-secondary mb-2">Check for updates every</label>
+          <select id="poll-interval" class="select w-auto">
+            <option value="1">1 minute</option>
+            <option value="2" selected>2 minutes</option>
+            <option value="5">5 minutes</option>
+            <option value="10">10 minutes</option>
+          </select>
+        </div>
+
+        <p class="text-xs text-muted mt-4">Configure notification types per-repo using the Alerts button above.</p>
+      </div>
+
+      <!-- Save Button -->
+      <div class="flex items-center gap-4 pt-2">
+        <button type="button" id="save-btn" class="btn-primary px-6 py-3 font-semibold">
+          Save Settings
+        </button>
+        <div id="save-status" class="status status-success">
+          ✓ Settings saved and PRs loaded!
+        </div>
+      </div>
+
+      </div><!-- End authenticated-sections -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center mt-12 pt-6 border-t border-color">
+      <p class="text-xs text-muted">GitHub PR Monitor v1.0.0</p>
+      <p class="text-xs text-muted mt-1">
+        Maintained by <a href="https://github.com/Kcharle" target="_blank" class="text-accent hover:underline">@Kcharle</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

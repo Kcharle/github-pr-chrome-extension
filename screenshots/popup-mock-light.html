@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub PR Monitor</title>
+  <link rel="stylesheet" href="../popup/popup.css">
+  <style>
+    /* Force light mode */
+    :root {
+      color-scheme: light;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #eaeef2;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #6e7781;
+      --border-primary: #d0d7de;
+      --border-secondary: #e6e8eb;
+      --accent: #0969da;
+      --accent-hover: #0860ca;
+      --accent-subtle: rgba(9, 105, 218, 0.1);
+      --success: #1a7f37;
+      --success-subtle: rgba(26, 127, 55, 0.1);
+      --warning: #9a6700;
+      --warning-subtle: rgba(154, 103, 0, 0.1);
+      --error: #cf222e;
+      --error-subtle: rgba(207, 34, 46, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <div class="title-row">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3v12a3 3 0 0 0 3 3h6"/>
+              <circle cx="6" cy="3" r="2"/>
+              <circle cx="18" cy="18" r="2"/>
+              <path d="M15 15l3 3-3 3"/>
+            </svg>
+          </div>
+          <h1>PR Monitor</h1>
+        </div>
+        <div class="header-actions">
+          <button id="refresh-btn" class="icon-btn" title="Refresh">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+          </button>
+          <button id="settings-btn" class="icon-btn" title="Settings">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="header-bottom">
+        <span class="filter-label">Viewing PRs for</span>
+        <div class="filter-toggle" id="filter-toggle">
+          <button class="filter-btn active" data-filter="all" title="Show all PRs">All</button>
+          <button class="filter-btn" data-filter="mine" title="Show PRs I authored">Me</button>
+          <button class="filter-btn" data-filter="others" title="Show PRs I'm reviewing">Others</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div id="pr-list" class="pr-list" style="display: block;">
+        <div class="org-group">
+          <div class="org-header">
+            <img class="org-icon" src="https://github.com/acme-corp.png?size=40" alt="acme-corp" onerror="this.style.display='none'">
+            <span class="org-name">acme-corp</span>
+            <span class="org-count">8 PRs</span>
+          </div>
+          <div class="repo-group">
+            <div class="repo-header">
+              <svg class="repo-chevron" viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+                <path d="M12.78 6.22a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0L3.22 7.28a.75.75 0 011.06-1.06L8 9.94l3.72-3.72a.75.75 0 011.06 0z"/>
+              </svg>
+              <svg class="repo-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                <path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8z"/>
+              </svg>
+              <span class="repo-name">web-platform</span>
+              <span class="repo-pr-count">5</span>
+            </div>
+            <div class="repo-prs">
+              <!-- PR 1 - Owner with draft -->
+              <div class="pr-card highlighted" data-activity="New comment">
+                <div class="pr-header">
+                  <img class="pr-avatar" src="https://i.pravatar.cc/40?img=1" alt="alexsmith">
+                  <div class="pr-info">
+                    <div class="pr-title">Add user dashboard analytics component</div>
+                    <div class="pr-meta">
+                      <span class="pr-author">@alexsmith</span>
+                      <span class="pr-number">#342</span>
+                      <div class="pr-badges">
+                        <span class="badge badge-draft">Draft</span>
+                        <span class="badge badge-author">owner</span>
+                      </div>
+                    </div>
+                    <div class="pr-activity">
+                      <span class="activity-item ci-success" title="CI: success">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.78-9.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z"/></svg>
+                        <span>1/1</span>
+                      </span>
+                      <span class="activity-item" title="2 comments">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0113.25 12H9.06l-2.573 2.573A1.458 1.458 0 014 13.543V12H2.75A1.75 1.75 0 011 10.25v-7.5z"/></svg>
+                        <span>2</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PR 2 - Reviewer with ready status -->
+              <div class="pr-card">
+                <div class="pr-header">
+                  <img class="pr-avatar" src="https://i.pravatar.cc/40?img=5" alt="janedev">
+                  <div class="pr-info">
+                    <div class="pr-title">Fix authentication flow for SSO providers</div>
+                    <div class="pr-meta">
+                      <span class="pr-author">@janedev</span>
+                      <span class="pr-number">#338</span>
+                      <div class="pr-badges">
+                        <span class="badge badge-ready">Ready</span>
+                        <span class="badge badge-role">reviewer</span>
+                      </div>
+                    </div>
+                    <div class="pr-activity">
+                      <span class="activity-item ci-success" title="CI: success">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.78-9.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z"/></svg>
+                        <span>2/2</span>
+                      </span>
+                      <span class="activity-item review-approved" title="Reviews: approved">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14c-1.981 0-3.671-.992-4.933-2.078C1.797 10.831.88 9.577.43 8.899a1.62 1.62 0 0 1 0-1.798c.45-.678 1.367-1.932 2.637-3.023C4.33 2.992 6.019 2 8 2ZM1.679 7.932a.12.12 0 0 0 0 .136c.411.622 1.241 1.75 2.366 2.717C5.176 11.758 6.527 12.5 8 12.5c1.473 0 2.825-.742 3.955-1.715 1.124-.967 1.954-2.096 2.366-2.717a.12.12 0 0 0 0-.136c-.412-.621-1.242-1.75-2.366-2.717C10.824 4.242 9.473 3.5 8 3.5c-1.473 0-2.824.742-3.955 1.715-1.124.967-1.954 2.096-2.366 2.717ZM8 10a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 10Z"/></svg>
+                        <span>2/2</span>
+                      </span>
+                      <span class="activity-item" title="8 comments">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0113.25 12H9.06l-2.573 2.573A1.458 1.458 0 014 13.543V12H2.75A1.75 1.75 0 011 10.25v-7.5z"/></svg>
+                        <span>8</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PR 3 - Assignee with CI failure -->
+              <div class="pr-card">
+                <div class="pr-header">
+                  <img class="pr-avatar" src="https://i.pravatar.cc/40?img=8" alt="mikeops">
+                  <div class="pr-info">
+                    <div class="pr-title">Update API rate limiting configuration</div>
+                    <div class="pr-meta">
+                      <span class="pr-author">@mikeops</span>
+                      <span class="pr-number">#335</span>
+                      <div class="pr-badges">
+                        <span class="badge badge-ready">Ready</span>
+                        <span class="badge badge-role">assignee</span>
+                      </div>
+                    </div>
+                    <div class="pr-activity">
+                      <span class="activity-item ci-failure" title="CI: failure">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.343 13.657A8 8 0 1113.657 2.343 8 8 0 012.343 13.657zM6.03 4.97a.75.75 0 00-1.06 1.06L6.94 8 4.97 9.97a.75.75 0 101.06 1.06L8 9.06l1.97 1.97a.75.75 0 101.06-1.06L9.06 8l1.97-1.97a.75.75 0 10-1.06-1.06L8 6.94 6.03 4.97z"/></svg>
+                        <span>0/3</span>
+                      </span>
+                      <span class="activity-item review-pending" title="Reviews: pending">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14c-1.981 0-3.671-.992-4.933-2.078C1.797 10.831.88 9.577.43 8.899a1.62 1.62 0 0 1 0-1.798c.45-.678 1.367-1.932 2.637-3.023C4.33 2.992 6.019 2 8 2ZM1.679 7.932a.12.12 0 0 0 0 .136c.411.622 1.241 1.75 2.366 2.717C5.176 11.758 6.527 12.5 8 12.5c1.473 0 2.825-.742 3.955-1.715 1.124-.967 1.954-2.096 2.366-2.717a.12.12 0 0 0 0-.136c-.412-.621-1.242-1.75-2.366-2.717C10.824 4.242 9.473 3.5 8 3.5c-1.473 0-2.824.742-3.955 1.715-1.124.967-1.954 2.096-2.366 2.717ZM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
+                        <span>0/1</span>
+                      </span>
+                      <span class="activity-item" title="3 comments">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0113.25 12H9.06l-2.573 2.573A1.458 1.458 0 014 13.543V12H2.75A1.75 1.75 0 011 10.25v-7.5z"/></svg>
+                        <span>3</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PR 4 - Owner draft, CI pending (partial view) -->
+              <div class="pr-card" style="opacity: 0.7;">
+                <div class="pr-header">
+                  <img class="pr-avatar" src="https://i.pravatar.cc/40?img=12" alt="sarahcode">
+                  <div class="pr-info">
+                    <div class="pr-title">[WIP] Implement dark mode theme support</div>
+                    <div class="pr-meta">
+                      <span class="pr-author">@sarahcode</span>
+                      <span class="pr-number">#330</span>
+                      <div class="pr-badges">
+                        <span class="badge badge-draft">Draft</span>
+                        <span class="badge badge-author">owner</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <span id="last-updated">Updated 2m ago</span>
+      <span class="footer-separator">•</span>
+      <span id="next-refresh">Next at 10:15:30 AM</span>
+    </footer>
+  </div>
+</body>
+</html>
