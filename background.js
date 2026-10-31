@@ -6,6 +6,13 @@ let seenPRIds = new Set();
 let prState = {}; // { [prId]: { commentCount, reviewState, ciStatus } }
 let isInitialized = false;
 
+// fetch() rejects with a TypeError only when the request never completed (offline, sleep, DNS).
+// Those are routine for a poller, so they warn; chrome://extensions' Errors page collects only errors.
+function logRequestError(message, error) {
+  if (error instanceof TypeError) console.warn(message, error.message);
+  else console.error(message, error);
+}
+
 // Initialize on service worker start
 chrome.runtime.onInstalled.addListener(() => {
   console.log('GitHub PR Monitor installed');
@@ -210,7 +217,7 @@ async function fetchAndStorePRs() {
     console.log(`Found ${prs.length} PRs, ${notifications.length} notifications`);
 
   } catch (error) {
-    console.error('Failed to fetch PRs:', error);
+    logRequestError('Failed to fetch PRs:', error);
     await chrome.storage.local.set({
       error: error.message,
       lastUpdated: Date.now()
@@ -248,7 +255,7 @@ async function fetchPRsForRepo(token, repoFullName, username, includeAuthored) {
   // Check for errors
   for (const response of responses) {
     if (!response.ok) {
-      throw new Error(`Failed to fetch PRs from ${repoFullName}`);
+      throw new Error(`Failed to fetch PRs from ${repoFullName} (HTTP ${response.status})`);
     }
   }
 
@@ -323,7 +330,7 @@ async function fetchPRDetails(token, prUrl) {
     console.log(`PR #${data.number} details: comments=${data.comments}, review_comments=${data.review_comments}, mergeable_state=${data.mergeable_state}, mergeable=${data.mergeable}`);
     return data;
   } catch (error) {
-    console.error('Error fetching PR details:', error);
+    logRequestError('Error fetching PR details:', error);
     return { draft: false };
   }
 }
@@ -429,7 +436,7 @@ async function fetchActivityData(token, prs) {
             console.log(`PR #${pr.number} workflow-runs failed:`, workflowResponse.status);
           }
         } catch (e) {
-          console.error(`PR #${pr.number} workflow-runs error:`, e);
+          logRequestError(`PR #${pr.number} workflow-runs error:`, e);
         }
 
         // Fetch Commit Status (older API - Jenkins, external CI, etc.)
@@ -458,7 +465,7 @@ async function fetchActivityData(token, prs) {
             console.log(`PR #${pr.number} commit-status failed:`, statusResponse.status);
           }
         } catch (e) {
-          console.error(`PR #${pr.number} commit-status error:`, e);
+          logRequestError(`PR #${pr.number} commit-status error:`, e);
         }
 
         // Combine both statuses
@@ -494,7 +501,7 @@ async function fetchActivityData(token, prs) {
         console.log(`PR #${pr.number} final ciStatus:`, pr.ciStatus);
       }
     } catch (error) {
-      console.error(`Failed to fetch activity for PR #${pr.number}:`, error);
+      logRequestError(`Failed to fetch activity for PR #${pr.number}:`, error);
     }
   }
 }
