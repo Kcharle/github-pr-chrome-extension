@@ -31,6 +31,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === 'UPDATE_BADGE_FILTER') {
     // Update badge based on filter
     updateBadgeWithFilter(message.filter);
+  } else if (message.type === 'PR_LIST_DATA') {
+    fetchPRListData(message.repo, message.numbers, sender)
+      .then(sendResponse)
+      .catch(error => sendResponse({ ok: false, error: error.message }));
+    return true;
   }
 });
 
@@ -492,6 +497,118 @@ async function fetchActivityData(token, prs) {
       console.error(`Failed to fetch activity for PR #${pr.number}:`, error);
     }
   }
+}
+
+// Diff stats, reviewers, and latest comment time for the PR list page, in one GraphQL call per page.
+// Answers only github.com tabs asking about monitored repos, since this worker holds the token.
+async function fetchPRListData(repoFullName, numbers, sender) {
+  if (!(sender.url ?? sender.tab?.url)?.startsWith('https://github.com/')) {
+    return { ok: false, error: 'bad-sender' };
+  }
+
+  const settings = await chrome.storage.sync.get(['token', 'repos', 'username']);
+  if (!settings.token) return { ok: false, error: 'not-configured' };
+  // URLs aren't case-sensitive on GitHub, so /Acme/Repo/pulls and a stored acme/repo must match
+  if (!(settings.repos || []).some(r => r.fullName?.toLowerCase() === repoFullName.toLowerCase())) {
+    return { ok: false, error: 'not-monitored' };
+  }
+
+  const [owner, name] = repoFullName.split('/');
+  // Numbers are interpolated into GraphQL aliases, so only positive safe integers get through
+  const prNumbers = [...new Set(numbers.map(Number).filter(n => Number.isSafeInteger(n) && n > 0))];
+  const prs = {};
+
+  // GraphQL caps a query's node count, so batch big lists; a PR list page has 25 rows
+  for (let i = 0; i < prNumbers.length; i += 100) {
+    const batch = prNumbers.slice(i, i + 100);
+    const fields = batch.map(n => `p${n}: pullRequest(number: ${n}) { ...listFields }`).join('\n');
+    const query = `
+      query($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) { ${fields} }
+      }
+      fragment listFields on PullRequest {
+        number additions deletions headRefOid
+        author { login }
+        reviewRequests(first: 20) {
+          nodes { requestedReviewer {
+            ... on User { login avatarUrl }
+            ... on Team { slug avatarUrl }
+          } }
+        }
+        latestReviews(first: 20) { nodes { state commit { oid } author { login avatarUrl } } }
+        timelineItems(last: 3, itemTypes: [ISSUE_COMMENT, PULL_REQUEST_REVIEW]) {
+          nodes {
+            ... on IssueComment { createdAt }
+            ... on PullRequestReview { submittedAt }
+          }
+        }
+      }`;
+
+    const response = await fetch(`${GITHUB_API}/graphql`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${settings.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { owner, name } })
+    });
+    if (!response.ok) return { ok: false, error: `http-${response.status}` };
+
+    // Partial errors (e.g. a deleted PR number) null out that alias but keep the rest
+    const { data } = await response.json();
+    if (!data?.repository) return { ok: false, error: 'repository-unavailable' };
+
+    for (const pr of Object.values(data.repository)) {
+      if (pr) prs[pr.number] = summarizePRForList(pr, owner, settings.username);
+    }
+  }
+
+  return { ok: true, prs };
+}
+
+// Reviewers = pending requests plus everyone who has reviewed, because GitHub drops a reviewer
+// from reviewRequests once they submit a review.
+function summarizePRForList(pr, owner, username) {
+  const authorLogin = pr.author?.login;
+  const reviewers = new Map();
+
+  for (const { requestedReviewer: r } of pr.reviewRequests.nodes) {
+    if (!r) continue;
+    // Bots and mannequins match neither fragment and come back as {}
+    if (r.slug) {
+      reviewers.set(`team:${r.slug}`, { login: r.slug, avatarUrl: r.avatarUrl, isTeam: true, state: 'PENDING', url: `https://github.com/orgs/${owner}/teams/${r.slug}` });
+    } else if (r.login) {
+      reviewers.set(r.login, { login: r.login, avatarUrl: r.avatarUrl, isTeam: false, state: 'PENDING', url: `https://github.com/${r.login}` });
+    }
+  }
+  for (const review of pr.latestReviews.nodes) {
+    const login = review.author?.login;
+    if (!login || login === authorLogin || reviewers.has(login)) continue;
+    reviewers.set(login, { login, avatarUrl: review.author.avatarUrl, isTeam: false, state: review.state, url: `https://github.com/${login}` });
+  }
+
+  const commentTimes = pr.timelineItems.nodes
+    .map(item => item.createdAt || item.submittedAt)
+    .filter(Boolean)
+    .sort();
+
+  return {
+    additions: pr.additions,
+    deletions: pr.deletions,
+    reviewers: [...reviewers.values()],
+    needsMyReview: needsMyReview(pr, username),
+    lastCommentAt: commentTimes.at(-1) || null
+  };
+}
+
+// I'm a pending reviewer, or my latest review asked for changes or commented and commits have
+// landed since. Approvals don't count; a rebase or force-push does, as the head commit changes.
+function needsMyReview(pr, username) {
+  if (!username) return false;
+  const me = username.toLowerCase();
+  if (pr.author?.login?.toLowerCase() === me) return false;
+  if (pr.reviewRequests.nodes.some(n => n.requestedReviewer?.login?.toLowerCase() === me)) return true;
+
+  const myReview = pr.latestReviews.nodes.find(r => r.author?.login?.toLowerCase() === me);
+  return ['CHANGES_REQUESTED', 'COMMENTED'].includes(myReview?.state) &&
+    Boolean(myReview.commit?.oid) && myReview.commit.oid !== pr.headRefOid;
 }
 
 // Get notification settings for a specific repo

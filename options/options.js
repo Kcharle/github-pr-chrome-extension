@@ -580,5 +580,40 @@ disconnectBtn.addEventListener('click', async () => {
   }
 });
 
+// PR list page toggles save on change, outside the Save button, so they stay in step with the popup's.
+const prListSettingsEl = document.getElementById('pr-list-settings');
+
+function renderPRListSettings() {
+  prListSettingsEl.innerHTML = PR_LIST_SETTINGS.map(({ key, label, description }) => `
+    <label class="flex items-start gap-3 cursor-pointer">
+      <input type="checkbox" class="checkbox mt-0.5" data-pr-list-setting="${key}">
+      <span>
+        <span class="block text-sm font-medium">${label}</span>
+        <span class="block text-xs text-muted">${description}</span>
+      </span>
+    </label>
+  `).join('');
+}
+
+async function loadPRListSettings() {
+  const values = await chrome.storage.sync.get(PR_LIST_SETTING_KEYS);
+  prListSettingsEl.querySelectorAll('[data-pr-list-setting]').forEach(input => {
+    input.checked = values[input.dataset.prListSetting] === true;
+  });
+}
+
+prListSettingsEl.addEventListener('change', (e) => {
+  const key = e.target.dataset.prListSetting;
+  if (key) chrome.storage.sync.set({ [key]: e.target.checked });
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && PR_LIST_SETTING_KEYS.some(key => key in changes)) {
+    loadPRListSettings();
+  }
+});
+
 // Initialize
+renderPRListSettings();
+loadPRListSettings();
 loadSettings();

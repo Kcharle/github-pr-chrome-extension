@@ -57,6 +57,7 @@
                       <li>• <code class="code">Pull requests</code> → Read-only</li>
                       <li>• <code class="code">Commit statuses</code> → Read-only (for CI status)</li>
                       <li>• <code class="code">Actions</code> → Read-only (for GitHub Actions status)</li>
+                      <li>• <code class="code">Contents</code> → Read-only (to spot new commits since your review)</li>
                       <li>• <code class="code">Metadata</code> → Read-only</li>
                     </ul>
                   </li>
@@ -225,6 +226,18 @@
         <p class="text-xs text-muted mt-4">Configure notification types per-repo using the Alerts button above.</p>
       </div>
 
+      <!-- Pull Request Page Card -->
+      <div class="card">
+        <h2 class="text-base font-semibold flex items-center gap-2 mb-4">
+          <span class="accent-bar"></span>
+          Pull request page
+        </h2>
+
+        <div id="pr-list-settings" class="space-y-3"></div>
+
+        <p class="text-xs text-muted mt-4">Applies to the pull request list of monitored repositories. Changes save immediately.</p>
+      </div>
+
       <!-- Save Button -->
       <div class="flex items-center gap-4 pt-2">
         <button type="button" id="save-btn" class="btn-primary px-6 py-3 font-semibold">
@@ -238,12 +251,13 @@
 
     <!-- Footer -->
     <footer class="text-center mt-12 pt-6 border-t border-color">
-      <p class="text-xs text-muted">GitHub PR Monitor v1.0.0</p>
+      <p class="text-xs text-muted">GitHub PR Monitor v1.1.0</p>
       <p class="text-xs text-muted mt-1">
         Maintained by <a href="https://github.com/Kcharle" target="_blank" class="text-accent hover:underline">@Kcharle</a>
       </p>
     </footer>
   </div>
+  <script src="../lib/pr-list-settings.js"></script>
   <script src="options.js"></script>
 </body>
 </html>
