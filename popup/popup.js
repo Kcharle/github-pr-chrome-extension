@@ -503,5 +503,34 @@ filterToggle.addEventListener('click', (e) => {
   applyFilter();
 });
 
+// PR list page toggles: independent on/off pills, saved straight to sync storage (shared with options)
+const prListTogglesEl = document.getElementById('pr-list-toggles');
+
+prListTogglesEl.innerHTML = PR_LIST_SETTINGS.map(({ key, label, description }) =>
+  `<button class="filter-btn" data-pr-list-setting="${key}" title="${description}" aria-pressed="false">${label}</button>`
+).join('');
+
+async function loadPRListToggles() {
+  const values = await chrome.storage.sync.get(PR_LIST_SETTING_KEYS);
+  prListTogglesEl.querySelectorAll('[data-pr-list-setting]').forEach(btn => {
+    const on = values[btn.dataset.prListSetting] === true;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on);
+  });
+}
+
+prListTogglesEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-pr-list-setting]');
+  if (!btn) return;
+  chrome.storage.sync.set({ [btn.dataset.prListSetting]: !btn.classList.contains('active') });
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && PR_LIST_SETTING_KEYS.some(key => key in changes)) {
+    loadPRListToggles();
+  }
+});
+
 // Initialize
+loadPRListToggles();
 loadFilterPreference().then(() => loadData());

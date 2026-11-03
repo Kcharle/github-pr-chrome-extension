@@ -15,6 +15,7 @@ A Chrome extension that monitors GitHub pull requests where you're a reviewer, a
 - **Collapsible Sections**: Organize PRs by organization and repository
 - **Dark Mode**: Automatic theme switching based on system preference
 - **Badge Count**: At-a-glance PR count on the extension icon (updates with filter)
+- **PR Page Tweaks**: Opt-in line diffs, reviewer avatars, and last-comment times on GitHub's pull request list
 
 ## Screenshots
 
@@ -73,6 +74,7 @@ A Chrome extension that monitors GitHub pull requests where you're a reviewer, a
    - `Pull requests` → Read-only
    - `Commit statuses` → Read-only (for CI status)
    - `Actions` → Read-only (for GitHub Actions status)
+   - `Contents` → Read-only (to spot new commits since your review)
    - `Metadata` → Read-only (auto-selected)
 6. Click **Generate token** and copy it
 
@@ -132,6 +134,16 @@ The extension icon shows:
 - **Red number**: PR count (updates based on your filter selection)
 - **Gray ?**: Extension not configured
 
+### Pull Request Page Tweaks
+
+Opt-in changes to the pull request list on github.com, for monitored repositories only. Toggle them under **Page tweaks** in the popup or the **Pull request page** card in Settings; both save immediately and apply to open tabs without a reload.
+
+- **Line diffs**: `+123 −45` next to each PR's opened time
+- **Reviewers**: reviewer avatars replace the assignee avatars, each with a dot for its state (green approved, red changes requested, grey commented, hollow amber pending). Rows turn amber when a PR needs your review: you're a requested reviewer, or you commented or requested changes and new commits have landed since. The new-commits check needs `Contents` → Read-only on fine-grained tokens
+- **Last comment**: when the latest comment or review was left, bots included
+
+The data comes from one GitHub GraphQL request per page, made by the extension's background worker, so your token never reaches the page.
+
 ## Configuration
 
 | Setting | Description | Default |
@@ -162,6 +174,7 @@ The extension icon shows:
   - `Pull requests` → Read-only
   - `Commit statuses` → Read-only (for CI status)
   - `Actions` → Read-only (for GitHub Actions status)
+  - `Contents` → Read-only (to re-highlight PRs with new commits since your review)
 - For **classic tokens**: ensure `repo` scope is selected
 
 ### CI status not showing
@@ -183,6 +196,7 @@ The extension icon shows:
 
 This extension:
 - Only communicates with `api.github.com`
+- Runs a script on `github.com` pages only to apply the opt-in PR page tweaks; it reads PR numbers from the page and sends nothing elsewhere
 - Stores your token locally in Chrome's secure storage
 - Does not collect or transmit any analytics
 - Is fully open source
@@ -239,6 +253,11 @@ github-pr-chrome-extension/
 │   ├── options.html        # Settings page
 │   ├── options.css         # Compiled styles
 │   └── options.js          # Settings logic
+├── content/
+│   ├── pr-list.js          # PR list page tweaks (content script)
+│   └── pr-list.css         # Styles for the tweaks
+├── lib/
+│   └── pr-list-settings.js # Tweak setting keys/labels shared by popup, options, content script
 ├── icons/                  # Extension icons (16, 48, 128px)
 └── dist/                   # Built extension (load this in Chrome)
 ```

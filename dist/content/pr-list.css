@@ -1,0 +1,103 @@
+/* Styles for content/pr-list.js decorations; class names are prefixed prm- to avoid GitHub collisions. */
+
+.prm-diff {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.prm-sep {
+  margin: 0 2px 0 4px;
+  font-weight: normal;
+}
+
+/* GitHub's Primer variables, so both light and dark themes match the diff colors on the PR page */
+.prm-add {
+  color: var(--fgColor-success, #1a7f37);
+}
+
+.prm-del {
+  color: var(--fgColor-danger, #d1242f);
+}
+
+/* Flex gap rather than literal spaces, which flex layout trims */
+.prm-last-comment {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.prm-hidden {
+  display: none !important;
+}
+
+/* Reviewer stack: overlapping like GitHub's assignee stack, fanning out on hover */
+.prm-reviewers {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.prm-reviewer {
+  position: relative;
+  display: inline-flex;
+  transition: margin 0.15s ease;
+}
+
+.prm-reviewer + .prm-reviewer {
+  margin-left: -6px;
+}
+
+.prm-reviewers:hover .prm-reviewer + .prm-reviewer {
+  margin-left: 2px;
+}
+
+.prm-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bgColor-default, #fff);
+}
+
+.prm-avatar-team {
+  border-radius: 4px;
+}
+
+/* Review state dot, bottom-right of each avatar */
+.prm-state-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 1.5px var(--bgColor-default, #fff);
+}
+
+.prm-state-approved .prm-state-dot {
+  background: var(--fgColor-success, #1a7f37);
+}
+
+.prm-state-changes_requested .prm-state-dot {
+  background: var(--fgColor-danger, #d1242f);
+}
+
+.prm-state-commented .prm-state-dot,
+.prm-state-dismissed .prm-state-dot {
+  background: var(--fgColor-muted, #59636e);
+}
+
+.prm-state-pending .prm-state-dot {
+  background: var(--bgColor-default, #fff);
+  border: 2px solid var(--fgColor-attention, #9a6700);
+}
+
+/* Needs my review: amber, since GitHub already uses a blue left bar for unread rows */
+.prm-needs-my-review {
+  background-color: var(--bgColor-attention-muted, rgba(212, 167, 44, 0.1)) !important;
+  box-shadow: inset 3px 0 0 var(--borderColor-attention-emphasis, #9a6700);
+}
