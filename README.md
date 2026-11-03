@@ -31,6 +31,14 @@ A Chrome extension that monitors GitHub pull requests where you're a reviewer, a
 |-------|----------|
 | ![Popup Dark](screenshots/popup-dark.png) | ![Settings Dark](screenshots/settings-dark.png) |
 
+### Pull Request Page Tweaks
+
+All three tweaks on [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes/pulls): line diffs and last-comment time on the meta line, reviewer avatars with review-state dots in place of assignees, and amber rows awaiting the signed-in user's review.
+
+![PR list tweaks, light](screenshots/pr-list.png)
+
+![PR list tweaks, dark](screenshots/pr-list-dark.png)
+
 ## Installation
 
 ### For Users (Quick Install)
