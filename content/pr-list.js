@@ -47,11 +47,19 @@ const decorators = {
         el?.remove();
         return;
       }
-      if (el?.dataset.signature === pr.lastCommentAt) return;
+      const signature = `${pr.lastCommentAt}|${pr.lastCommentBy}`;
+      if (el?.dataset.signature === signature) return;
 
       el ??= createEl('span', 'prm-last-comment');
-      el.dataset.signature = pr.lastCommentAt;
+      el.dataset.signature = signature;
       el.replaceChildren(createEl('span', 'prm-sep', '·'), 'last comment', relativeTime(pr.lastCommentAt));
+      // GraphQL's comment author is nullable; without one the "by" is dropped rather than guessed
+      if (pr.lastCommentBy) {
+        const author = createEl('a', 'prm-comment-author', pr.lastCommentBy);
+        // GitHub's own profile URL: app bots live under /apps/, not /<login>
+        author.href = pr.lastCommentByUrl || `https://github.com/${pr.lastCommentBy}`;
+        el.append('by', author);
+      }
       if (!el.isConnected) (row.querySelector('.prm-diff') || meta).after(el);
     },
     remove(row) {

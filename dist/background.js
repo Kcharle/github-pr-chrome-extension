@@ -545,8 +545,8 @@ async function fetchPRListData(repoFullName, numbers, sender) {
         latestReviews(first: 20) { nodes { state commit { oid } author { login avatarUrl } } }
         timelineItems(last: 3, itemTypes: [ISSUE_COMMENT, PULL_REQUEST_REVIEW]) {
           nodes {
-            ... on IssueComment { createdAt }
-            ... on PullRequestReview { submittedAt }
+            ... on IssueComment { createdAt author { login url } }
+            ... on PullRequestReview { submittedAt author { login url } }
           }
         }
       }`;
@@ -591,17 +591,21 @@ function summarizePRForList(pr, owner, username) {
     reviewers.set(login, { login, avatarUrl: review.author.avatarUrl, isTeam: false, state: review.state, url: `https://github.com/${login}` });
   }
 
-  const commentTimes = pr.timelineItems.nodes
-    .map(item => item.createdAt || item.submittedAt)
-    .filter(Boolean)
-    .sort();
+  // Latest by timestamp, not timeline order: a review is placed when started but dated when submitted
+  const lastComment = pr.timelineItems.nodes
+    .map(item => ({ at: item.createdAt || item.submittedAt, by: item.author?.login || null, url: item.author?.url || null }))
+    .filter(c => c.at)
+    .sort((a, b) => a.at.localeCompare(b.at))
+    .at(-1);
 
   return {
     additions: pr.additions,
     deletions: pr.deletions,
     reviewers: [...reviewers.values()],
     needsMyReview: needsMyReview(pr, username),
-    lastCommentAt: commentTimes.at(-1) || null
+    lastCommentAt: lastComment?.at || null,
+    lastCommentBy: lastComment?.by || null,
+    lastCommentByUrl: lastComment?.url || null
   };
 }
 
