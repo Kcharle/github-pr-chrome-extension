@@ -3,7 +3,7 @@
 const PR_LIST_SETTINGS = [
   { key: 'prListDiffStats', label: 'Line diffs', description: 'Show +additions −deletions on each PR' },
   { key: 'prListReviewers', label: 'Reviewers', description: 'Show reviewers instead of assignees and highlight PRs awaiting your review, including new commits since you commented or requested changes' },
-  { key: 'prListLastComment', label: 'Last comment', description: 'Show when the latest comment or review was left' }
+  { key: 'prListLastComment', label: 'Last comment', description: 'Show when the latest comment or review was left, and by whom' }
 ];
 
 const PR_LIST_SETTING_KEYS = PR_LIST_SETTINGS.map(s => s.key);

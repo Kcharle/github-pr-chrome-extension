@@ -148,7 +148,7 @@ Opt-in changes to the pull request list on github.com, for monitored repositorie
 
 - **Line diffs**: `+123 −45` next to each PR's opened time
 - **Reviewers**: reviewer avatars replace the assignee avatars, each with a dot for its state (green approved, red changes requested, grey commented, hollow amber pending). Rows turn amber when a PR needs your review: you're a requested reviewer, or you commented or requested changes and new commits have landed since. The new-commits check needs `Contents` → Read-only on fine-grained tokens
-- **Last comment**: when the latest comment or review was left, bots included
+- **Last comment**: when the latest comment or review was left and who left it, bots included
 
 The data comes from one GitHub GraphQL request per page, made by the extension's background worker, so your token never reaches the page.
 

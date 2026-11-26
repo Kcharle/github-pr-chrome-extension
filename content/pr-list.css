@@ -30,6 +30,17 @@
   white-space: nowrap;
 }
 
+/* Matches the meta line's own author link: same color, underline on hover */
+.prm-comment-author {
+  color: inherit;
+  text-decoration: none;
+}
+
+.prm-comment-author:hover {
+  color: var(--fgColor-accent, #0969da);
+  text-decoration: underline;
+}
+
 .prm-hidden {
   display: none !important;
 }
